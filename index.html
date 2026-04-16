@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="roslib.min.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        button { width: 100px; height: 50px; margin: 10px; cursor: pointer; }
+        #status { font-weight: bold; padding: 10px; margin-bottom: 20px; }
+        .connected { color: green; }
+        .disconnected { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Robot Control</h1>
+    
+    <div id="status" class="disconnected">Status: Disconnected</div>
+
+    <div class="controls">
+        <button onmousedown="move(0.5, 0)" onmouseup="stop()">Forward</button><br>
+        <button onmousedown="move(0, -1.0)" onmouseup="stop()">Left</button>
+        <button onmousedown="move(0, 1.0)" onmouseup="stop()">Right</button><br>
+        <button onmousedown="move(-0.5, 0)" onmouseup="stop()">Backward</button>
+    </div>
+
+    <script>
+        // Use localhost if testing on the same machine, or robot.local for remote
+        const ros = new ROSLIB.Ros({
+            url: 'ws://' + window.location.hostname + ':9090'
+        });
+
+        const statusDiv = document.getElementById('status');
+
+        ros.on('connection', () => {
+            statusDiv.innerText = 'Status: Connected ✅';
+            statusDiv.className = 'connected';
+            console.log('Connected to websocket server.');
+        });
+
+        ros.on('error', (error) => {
+            statusDiv.innerText = 'Status: Error (Is rosbridge running?) ❌';
+            statusDiv.className = 'disconnected';
+            console.log('Error connecting to websocket server: ', error);
+        });
+
+        ros.on('close', () => {
+            statusDiv.innerText = 'Status: Closed ⚠️';
+            statusDiv.className = 'disconnected';
+            console.log('Connection to websocket server closed.');
+        });
+
+        const cmdVel = new ROSLIB.Topic({
+            ros: ros,
+            name: '/cmd_vel',
+            messageType: 'geometry_msgs/msg/Twist'
+        });
+
+        function move(linear, angular) {
+            const twist = new ROSLIB.Message({
+                linear: { x: linear, y: 0, z: 0 },
+                angular: { x: 0, y: 0, z: angular }
+            });
+            cmdVel.publish(twist);
+            console.log("Published to /cmd_vel");
+        }
+
+        function stop() {
+            move(0, 0);
+        }
+    </script>
+</body>
+</html>
