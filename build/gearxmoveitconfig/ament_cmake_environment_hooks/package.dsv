@@ -1,0 +1,4 @@
+source;share/gearxmoveitconfig/local_setup.bash
+source;share/gearxmoveitconfig/local_setup.dsv
+source;share/gearxmoveitconfig/local_setup.sh
+source;share/gearxmoveitconfig/local_setup.zsh

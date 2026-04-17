@@ -1,74 +1,71 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist, TransformStamped
+from rclpy.action import ActionClient
+from moveit_msgs.action import MoveGroup
+from geometry_msgs.msg import Pose, PoseStamped, TransformStamped, Twist
+from trajectory_msgs.msg import JointTrajectory
 from tf2_ros import TransformBroadcaster
 import math
 
-class SimpleMover(Node):
+class GearXBridge(Node):
     def __init__(self):
-        super().__init__('simple_mover')
-        
-        # This sends the "position" to RViz
+        super().__init__('gearx_bridge')
         self.br = TransformBroadcaster(self)
         
-        # This listens to your HTML buttons
-        self.subscription = self.create_subscription(
-            Twist,
-            '/cmd_vel',
-            self.cmd_callback,
-            10)
-            
-        # Initial Position
-        self.x = 0.0
-        self.y = 0.0
-        self.th = 0.0 # Theta (Rotation)
-        
-        # Current Velocities
-        self.linear_v = 0.0
-        self.angular_v = 0.0
-        
-        # Run the math loop at 20Hz (every 0.05 seconds)
-        self.timer = self.create_timer(0.05, self.update_position)
-        self.get_logger().info("Simple Mover Node Started. Waiting for /cmd_vel...")
+        # Action Client - ensure name is exactly '/move_group'
+        self._action_client = ActionClient(self, MoveGroup, '/move_group')
 
-    def cmd_callback(self, msg):
-        self.linear_v = msg.linear.x
-        self.angular_v = msg.angular.z
+        self.target_sub = self.create_subscription(PoseStamped, '/target_pose', self.web_target_callback, 10)
+        self.traj_sub = self.create_subscription(JointTrajectory, '/base_controller/joint_trajectory', self.traj_callback, 10)
+        self.pose_pub = self.create_publisher(Pose, '/robot_pose', 10)
+        self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
 
-    def update_position(self):
-        dt = 0.05
+        self.x, self.y, self.th = 0.0, 0.0, 0.0
+        self.create_timer(0.1, self.update_loop)
+        self.get_logger().info("GearX Bridge initialized.")
+
+    def web_target_callback(self, msg):
+        self.get_logger().info(f"Targeting: X={msg.pose.position.x}, Y={msg.pose.position.y}")
         
-        # 1. Calculate new coordinates based on velocity
-        # New X = current X + (speed * cos(angle) * time)
-        self.x += self.linear_v * math.cos(self.th) * dt
-        self.y += self.linear_v * math.sin(self.th) * dt
-        self.th += self.angular_v * dt
+        # Teleport for UI feedback test
+        self.x = msg.pose.position.x
+        self.y = msg.pose.position.y
+        
+        self.send_moveit_goal(msg.pose)
 
-        # 2. Create the Transform Message for RViz
+    def send_moveit_goal(self, pose):
+        if not self._action_client.wait_for_server(timeout_sec=10.0):
+            self.get_logger().error("Action Server Timeout! MoveIt node is likely crashing or uninitialized.")
+            return
+
+        goal_msg = MoveGroup.Goal()
+        goal_msg.request.group_name = "base_group"
+        goal_msg.request.num_planning_attempts = 10
+        goal_msg.request.allowed_planning_time = 5.0
+        
+        # Send goal
+        self._action_client.send_goal_async(goal_msg)
+
+    def traj_callback(self, msg):
+        if not msg.points: return
+        point = msg.points[0]
+        self.x, self.y, self.th = point.positions[0], point.positions[1], point.positions[2]
+
+    def update_loop(self):
+        p = Pose()
+        p.position.x, p.position.y = self.x, self.y
+        self.pose_pub.publish(p)
+
         t = TransformStamped()
         t.header.stamp = self.get_clock().now().to_msg()
-        t.header.frame_id = 'map'
-        t.child_frame_id = 'base_link'
-
-        # Translation (Movement)
-        t.transform.translation.x = self.x
-        t.transform.translation.y = self.y
-        t.transform.translation.z = 0.0
-
-        # Rotation (Quaternion math for 2D)
-        t.transform.rotation.z = math.sin(self.th / 2.0)
-        t.transform.rotation.w = math.cos(self.th / 2.0)
-
-        # 3. Shout it out to RViz
+        t.header.frame_id, t.child_frame_id = 'odom', 'base_footprint'
+        t.transform.translation.x, t.transform.translation.y = self.x, self.y
+        t.transform.rotation.z, t.transform.rotation.w = math.sin(self.th / 2.0), math.cos(self.th / 2.0)
         self.br.sendTransform(t)
 
 def main():
     rclpy.init()
-    node = SimpleMover()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        pass
+    rclpy.spin(GearXBridge())
     rclpy.shutdown()
 
 if __name__ == '__main__':

@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: ""
+    relative_path: /home/karthikkrazy/robotcontrolled/robot.urdf
+  srdf:
+    relative_path: config/gearx_robot.srdf
+  package_settings:
+    author_name: karthikkrazy
+    author_email: goparajukarthik2@gmail.com
+    generated_timestamp: 1776444197

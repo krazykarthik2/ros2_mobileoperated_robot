@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="gearx_robot">
+    <group name="base_group">
+        <joint name="virtual_planar_joint"/>
+    </group>
+    <virtual_joint name="virtual_planar_joint" type="planar" parent_frame="odom" child_link="base_footprint"/>
+    <disable_collisions link1="base_link" link2="front_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="front_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="rear_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="rear_right_wheel" reason="Adjacent"/>
+</robot>

@@ -1,70 +1,161 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <title>GearX MoveIt Control</title>
     <script src="roslib.min.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; }
-        button { width: 100px; height: 50px; margin: 10px; cursor: pointer; }
-        #status { font-weight: bold; padding: 10px; margin-bottom: 20px; }
-        .connected { color: green; }
-        .disconnected { color: red; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #1a1a1a; 
+            color: white; 
+            text-align: center; 
+            padding: 20px; 
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: #2d2d2d;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #status { 
+            font-weight: bold; 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            border-radius: 5px;
+        }
+        .connected { background-color: #2e7d32; }
+        .disconnected { background-color: #c62828; }
+        
+        input {
+            width: 80px;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            background: #444;
+            color: white;
+        }
+        
+        button { 
+            width: 200px; 
+            height: 50px; 
+            margin-top: 20px; 
+            cursor: pointer; 
+            background-color: #0277bd;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover { background-color: #01579b; }
+        button:active { transform: scale(0.95); }
+
+        .pose-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: #222;
+            border-radius: 10px;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        #log {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
-    <h1>Robot Control</h1>
-    
-    <div id="status" class="disconnected">Status: Disconnected</div>
+    <div class="container">
+        <h1>GearX Navigation</h1>
+        
+        <div id="status" class="disconnected">Status: Disconnected ❌</div>
 
-    <div class="controls">
-        <button onmousedown="move(0.5, 0)" onmouseup="stop()">Forward</button><br>
-        <button onmousedown="move(0, -1.0)" onmouseup="stop()">Left</button>
-        <button onmousedown="move(0, 1.0)" onmouseup="stop()">Right</button><br>
-        <button onmousedown="move(-0.5, 0)" onmouseup="stop()">Backward</button>
+        <div class="controls">
+            <h3>Set Target Coordinates</h3>
+            <label>X: </label><input type="number" id="targetX" value="1.0" step="0.1">
+            <label>Y: </label><input type="number" id="targetY" value="0.0" step="0.1">
+            <br>
+            <button onclick="sendTarget()">Plan & Execute Path</button>
+        </div>
+
+        <div class="pose-display">
+            <p><strong>Current Robot Position</strong></p>
+            X: <span id="posX" style="color: #4fc3f7;">0.00</span> | 
+            Y: <span id="posY" style="color: #4fc3f7;">0.00</span>
+        </div>
+        <div id="log">Waiting for input...</div>
     </div>
 
     <script>
-        // Use localhost if testing on the same machine, or robot.local for remote
+        // Use the hostname of the machine serving the page
         const ros = new ROSLIB.Ros({
             url: 'ws://' + window.location.hostname + ':9090'
         });
 
         const statusDiv = document.getElementById('status');
+        const logDiv = document.getElementById('log');
 
         ros.on('connection', () => {
             statusDiv.innerText = 'Status: Connected ✅';
             statusDiv.className = 'connected';
-            console.log('Connected to websocket server.');
+            logDiv.innerText = 'Rosbridge connection established.';
         });
 
         ros.on('error', (error) => {
-            statusDiv.innerText = 'Status: Error (Is rosbridge running?) ❌';
+            statusDiv.innerText = 'Status: Error (Check Rosbridge) ❌';
             statusDiv.className = 'disconnected';
-            console.log('Error connecting to websocket server: ', error);
+            logDiv.innerText = 'Connection error. Is Rosbridge running?';
         });
 
         ros.on('close', () => {
             statusDiv.innerText = 'Status: Closed ⚠️';
             statusDiv.className = 'disconnected';
-            console.log('Connection to websocket server closed.');
         });
 
-        const cmdVel = new ROSLIB.Topic({
+        // Publisher for the Target Pose
+        const targetTopic = new ROSLIB.Topic({
             ros: ros,
-            name: '/cmd_vel',
-            messageType: 'geometry_msgs/msg/Twist'
+            name: '/target_pose',
+            messageType: 'geometry_msgs/msg/PoseStamped'
         });
 
-        function move(linear, angular) {
-            const twist = new ROSLIB.Message({
-                linear: { x: linear, y: 0, z: 0 },
-                angular: { x: 0, y: 0, z: angular }
-            });
-            cmdVel.publish(twist);
-            console.log("Published to /cmd_vel");
-        }
+        // Subscriber to track current position (Feedback from simple_move.py)
+        const poseSub = new ROSLIB.Topic({
+            ros: ros,
+            name: '/robot_pose', 
+            messageType: 'geometry_msgs/msg/Pose'
+        });
 
-        function stop() {
-            move(0, 0);
+        poseSub.subscribe((message) => {
+            document.getElementById('posX').innerText = message.position.x.toFixed(2);
+            document.getElementById('posY').innerText = message.position.y.toFixed(2);
+        });
+
+        function sendTarget() {
+            const x = parseFloat(document.getElementById('targetX').value);
+            const y = parseFloat(document.getElementById('targetY').value);
+            
+            // CRITICAL FIX: Changed frame_id from 'map' to 'odom'
+            const pose = new ROSLIB.Message({
+                header: {
+                    stamp: { secs: 0, nsecs: 0 },
+                    frame_id: 'odom' 
+                },
+                pose: {
+                    position: { x: x, y: y, z: 0 },
+                    orientation: { x: 0, y: 0, z: 0, w: 1 }
+                }
+            });
+            
+            targetTopic.publish(pose);
+            logDiv.innerText = `Sent Target: [${x}, ${y}] to odom frame.`;
+            console.log(`Target Published: X=${x}, Y=${y}`);
         }
     </script>
 </body>

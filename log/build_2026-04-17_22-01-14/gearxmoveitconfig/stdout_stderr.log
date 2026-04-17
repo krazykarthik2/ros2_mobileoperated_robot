@@ -1,0 +1,50 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Configuring done (0.7s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/karthikkrazy/robotcontrolled/build/gearxmoveitconfig
+-- Install configuration: ""
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/ament_index/resource_index/package_run_dependencies/gearxmoveitconfig
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/ament_index/resource_index/parent_prefix_path/gearxmoveitconfig
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/environment/ament_prefix_path.sh
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/environment/ament_prefix_path.dsv
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/environment/path.sh
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/environment/path.dsv
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/local_setup.bash
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/local_setup.sh
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/local_setup.zsh
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/local_setup.dsv
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/package.dsv
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/ament_index/resource_index/packages/gearxmoveitconfig
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/cmake/gearxmoveitconfigConfig.cmake
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/cmake/gearxmoveitconfigConfig-version.cmake
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/package.xml
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/launch
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/launch/moveit_rviz.launch.py
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/launch/demo.launch.py
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/launch/rsp.launch.py
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/launch/move_group.launch.py
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/launch/warehouse_db.launch.py
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/launch/static_virtual_joint_tfs.launch.py
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/launch/spawn_controllers.launch.py
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/launch/setup_assistant.launch.py
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/config
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/config/kinematics.yaml
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/config/pilz_cartesian_limits.yaml
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/config/ros2_controllers.yaml
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/config/moveit.rviz
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/config/gearx_robot.srdf
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/config/joint_limits.yaml
+-- Installing: /home/karthikkrazy/robotcontrolled/install/gearxmoveitconfig/share/gearxmoveitconfig/.setup_assistant
